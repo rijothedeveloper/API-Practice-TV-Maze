@@ -25,7 +25,6 @@ async function searchShows(query) {
   // end point for search
   const end_point = "search/shows"
   const res = await axios.get(BASE_URL+end_point, {params: {"q": query}});
-  console.log(res);
   const shows = [];
   
   for (item of res.data) {
@@ -62,12 +61,18 @@ function populateShows(shows) {
            <div class="card-body">
              <h5 class="card-title">${show.name}</h5>
              <p class="card-text">${show.summary}</p>
+             <a href="#" class="btn btn-primary">Episodes</a>
            </div>
          </div>
        </div>
       `);
 
     $showsList.append($item);
+    $(".card-body").click(async function(evt) {
+      const id = evt.target.closest(".card").dataset.showId;
+      const episodes = await getEpisodes(id);
+      populateEpisodes(episodes);
+    })
   }
 }
 
@@ -96,9 +101,34 @@ $("#search-form").on("submit", async function handleSearch (evt) {
  */
 
 async function getEpisodes(id) {
-  // TODO: get episodes from tvmaze
-  //       you can get this by making GET request to
-  //       http://api.tvmaze.com/shows/SHOW-ID-HERE/episodes
+  const endUrl = `shows/${id}/episodes`;
+  const res = await axios.get(BASE_URL+endUrl);
+  const episodes = [];
+  for(item of res.data) {
+    const {id, name, season, number} = item;
+    episodes.push({
+      id, 
+      name, 
+      season, 
+      number
+    })
+  }
+  return episodes;
+}
 
-  // TODO: return array-of-episode-info, as described in docstring above
+/** Populate episodes list:
+ *     - given list of episodes, add spisodes to DOM and unhide episode area
+ */
+
+function populateEpisodes(episodes) {
+  const episodesArea = $("#episodes-area");
+  const episodeList = $("#episodes-list");
+  episodeList.empty();
+  for (let episode of episodes) {
+    const li = document.createElement("li");
+    li.innerText = `(${episode.name}, season ${episode.season}, number ${episode.number})`;
+    episodeList.append(li);
+  }
+  episodesArea.append(episodeList);
+  episodesArea.show();
 }
