@@ -30,14 +30,15 @@ async function searchShows(query) {
   
   for (item of res.data) {
     const show = {};
+    show.id = item.show.id;
+    show.name = item.show.name;
+    show.summary = item.show.summary;
     try {
-      show.id = item.show.id;
-      show.name = item.show.name;
-      show.summary = item.show.summary;
       show.image = item.show.image.medium;
     } catch {
-
+      show.image = "https://tinyurl.com/tv-missing";
     }
+      
     shows.push(show);
   }
   return shows;
@@ -57,6 +58,7 @@ function populateShows(shows) {
     let $item = $(
       `<div class="col-md-6 col-lg-3 Show" data-show-id="${show.id}">
          <div class="card" data-show-id="${show.id}">
+          <img class="card-img-top" src="${show.image}">
            <div class="card-body">
              <h5 class="card-title">${show.name}</h5>
              <p class="card-text">${show.summary}</p>
